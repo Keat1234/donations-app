@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  whopId    String   @unique
+  name      String?
+  email     String?  @unique
+  avatarUrl String?
+  role      String   @default("EDITOR") // "CREATOR" or "EDITOR"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  createdJobs Job[] @relation("CreatedJobs")
+  claimedJobs Job[] @relation("ClaimedJobs")
+}
+
+model Job {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  bountyAmount    Float
+  status          String   @default("OPEN") // "OPEN", "CLAIMED", "SUBMITTED", "APPROVED", "REVISION"
+  rawFootageUrl   String?
+  editedClipUrl   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  creatorId String
+  creator   User   @relation("CreatedJobs", fields: [creatorId], references: [id])
+
+  editorId String?
+  editor   User?  @relation("ClaimedJobs", fields: [editorId], references: [id])
+}

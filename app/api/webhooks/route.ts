@@ -35,7 +35,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 					currency: currency,
 					destination_account_id: "CREATOR_ACCOUNT_ID_PLACEHOLDER", // TODO: Retrieve actual creator account ID
 					description: "Donation payout (90%)",
-				});
+				} as any);
 				console.log(`Transferred ${creatorShare} ${currency} to creator.`);
 			} catch (transferError) {
 				console.error("Transfer failed:", transferError);

@@ -2,6 +2,7 @@ import { waitUntil } from "@vercel/functions";
 import type { Payment } from "@whop/sdk/resources.js";
 import type { NextRequest } from "next/server";
 import { whopsdk } from "@/lib/whop-sdk";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(request: NextRequest): Promise<Response> {
 	// Validate the webhook to ensure it's from Whop
@@ -14,32 +15,51 @@ export async function POST(request: NextRequest): Promise<Response> {
 		const { amount, currency, to_account_id, metadata } = webhookData.data as any;
 
 		if (metadata?.type === "donation") {
+			// Update donation status in DB
+			const donationId = metadata.donationId;
+			if (donationId) {
+				try {
+					await prisma.donation.update({
+						where: { id: donationId },
+						data: {
+							status: "COMPLETED",
+							senderName: webhookData.data.billing_address?.name || "Anonymous",
+						},
+					});
+				} catch (e) {
+					console.error("Failed to update donation status:", e);
+				}
+			}
+
 			// Calculate split
 			const totalAmount = amount;
 			const creatorShare = Math.floor(totalAmount * 0.9); // 90% to creator
 			// The remaining 10% stays in the app's account (which received the payment)
 
 			// Transfer 90% to the creator (who installed the app)
-			// Note: 'to_account_id' in the payment event might be the app's account or the user's.
-			// We need to transfer TO the creator's account. 
-			// Assuming we have the creator's account ID from the installation context or metadata.
-			// For this template, we'll assume 'to_account_id' is the context we need or we look it up.
+			const targetCompanyId = metadata.targetCompanyId;
 
-			// Actually, for a Whop App, the payment usually goes to the App's account first.
-			// We then transfer to the company that installed the app.
-			// We'll use a placeholder for the destination account ID logic.
-
-			try {
-				await whopsdk.transfers.create({
-					amount: creatorShare,
-					currency: currency,
-					destination_account_id: "CREATOR_ACCOUNT_ID_PLACEHOLDER", // TODO: Retrieve actual creator account ID
-					description: "Donation payout (90%)",
-				} as any);
-				console.log(`Transferred ${creatorShare} ${currency} to creator.`);
-			} catch (transferError) {
-				console.error("Transfer failed:", transferError);
-				// Don't fail the webhook, just log it. We might need to retry manually.
+			if (targetCompanyId && targetCompanyId !== "unknown") {
+				try {
+					// Note: In a real scenario, you need the destination ACCOUNT ID, not Company ID.
+					// You would typically look up the account ID associated with the company.
+					// For this template, we'll assume we can transfer to the company or we have a mapping.
+					// If the SDK requires an Account ID, you'd need to fetch the company's owner or linked account.
+					
+					// Placeholder: We are using the company ID as the destination for now, 
+					// but in production you must resolve this to a valid 'acct_' ID.
+					await whopsdk.transfers.create({
+						amount: creatorShare,
+						currency: currency,
+						destination_account_id: targetCompanyId, 
+						description: "Donation payout (90%)",
+					} as any);
+					console.log(`Transferred ${creatorShare} ${currency} to ${targetCompanyId}.`);
+				} catch (transferError) {
+					console.error("Transfer failed:", transferError);
+				}
+			} else {
+				console.warn("No target company ID found for donation transfer.");
 			}
 		}
 		waitUntil(handlePaymentSucceeded(webhookData.data));

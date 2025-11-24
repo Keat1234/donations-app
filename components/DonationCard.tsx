@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@whop/react/components";
 
-export function DonationCard() {
+export function DonationCard({ experienceId }: { experienceId?: string }) {
   const [amount, setAmount] = useState<number | "custom" | "">("");
   const [customAmount, setCustomAmount] = useState<string>("");
   const [message, setMessage] = useState("");
@@ -30,6 +30,7 @@ export function DonationCard() {
         body: JSON.stringify({
           amount: finalAmount,
           message,
+          experienceId,
         }),
       });
 

@@ -29,7 +29,7 @@ export default async function ExperiencePage({
 					</p>
 				</div>
 
-				<DonationCard />
+				<DonationCard experienceId={experienceId} />
 				<RecentDonations />
 			</div>
 		</div>

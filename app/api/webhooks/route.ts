@@ -11,7 +11,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
 	// Handle the webhook event
 	if (webhookData.type === "payment.succeeded") {
-		const { amount, currency, to_account_id, metadata } = webhookData.data;
+		const { amount, currency, to_account_id, metadata } = webhookData.data as any;
 
 		if (metadata?.type === "donation") {
 			// Calculate split

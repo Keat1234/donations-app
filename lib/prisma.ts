@@ -1,11 +1,10 @@
-import { PrismaClient } from "@prisma/client";
-
-const globalForPrisma = global as unknown as { prisma: PrismaClient };
-
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: ["query"],
-  });
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+// Mock Prisma client for deployment without database
+export const prisma = {
+  donation: {
+    create: async (data: any) => ({ id: 'mock-id', ...data.data }),
+    update: async (params: any) => ({ id: params.where.id, ...params.data }),
+    findMany: async () => [],
+    aggregate: async () => ({ _sum: { amount: 0 } }),
+    count: async () => 0,
+  },
+};

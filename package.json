@@ -4,18 +4,15 @@
 	"private": true,
 	"scripts": {
 		"dev": "whop-proxy --command \"next dev --turbopack\"",
-		"build": "pnpm exec prisma generate && next build",
+		"build": "next build",
 		"start": "next start",
 		"lint": "biome lint"
 	},
 	"dependencies": {
-		"@prisma/client": "^7.0.0",
 		"@vercel/functions": "^3.1.4",
-		"@vercel/postgres": "^0.10.0",
 		"@whop/react": "0.3.0",
 		"@whop/sdk": "0.0.3",
 		"next": "16.0.0",
-		"prisma": "^7.0.0",
 		"react": "19.2.0",
 		"react-dom": "19.2.0"
 	},

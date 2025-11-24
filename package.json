@@ -4,10 +4,9 @@
 	"private": true,
 	"scripts": {
 		"dev": "whop-proxy --command \"next dev --turbopack\"",
-		"build": "next build",
+		"build": "prisma generate && next build",
 		"start": "next start",
-		"lint": "biome lint",
-		"postinstall": "pnpm exec prisma generate"
+		"lint": "biome lint"
 	},
 	"dependencies": {
 		"@prisma/client": "^7.0.0",
@@ -16,6 +15,7 @@
 		"@whop/react": "0.3.0",
 		"@whop/sdk": "0.0.3",
 		"next": "16.0.0",
+		"prisma": "^7.0.0",
 		"react": "19.2.0",
 		"react-dom": "19.2.0"
 	},
